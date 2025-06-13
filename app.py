@@ -518,19 +518,10 @@ def main():
  
     st.markdown("---")
     st.markdown("""
-    **Note:** This application uses free APIs and may have rate limits. 
-    For production use, consider upgrading to paid API plans.
+    ### Source Code
+    This application is open source and available on GitHub:
+    [View Source Code](https://github.com/arjun-vegeta/stock_tariff_analysis)
     
-    *Built with Streamlit, yfinance, NewsAPI, Alpha Vantage, and various ML/NLP libraries.*
-    
-    **Features:**
-    - Real-time stock data analysis
-    - News sentiment analysis  
-    - Interactive visualizations
-    - Statistical correlation analysis
-    - Technical indicators (RSI, MACD, Bollinger Bands)
-    - Anomaly detection
-    - Comprehensive reporting
     """)
 
 if __name__ == "__main__":
