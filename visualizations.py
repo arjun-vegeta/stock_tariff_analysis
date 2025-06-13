@@ -11,8 +11,6 @@ import numpy as np
 import streamlit as st
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Tuple
-import seaborn as sns
-import matplotlib.pyplot as plt
 
 class StockTariffVisualizer:
     """Interactive visualization tools for stock and tariff analysis."""
