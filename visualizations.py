@@ -244,8 +244,7 @@ class StockTariffVisualizer:
                 'Correlation: %{z:.3f}<extra></extra>'
             ),
             colorbar=dict(                      # Colorbar configuration
-                title="Correlation<br>Coefficient",
-                titleside="right"
+                title="Correlation<br>Coefficient"
             )
         ))
         
