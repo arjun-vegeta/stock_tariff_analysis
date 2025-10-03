@@ -288,16 +288,29 @@ def merge_stock_news_data(stock_data: pd.DataFrame, news_data: pd.DataFrame) -> 
     if stock_data.empty or news_data.empty:
         return stock_data
     
-    stock_data['Date'] = pd.to_datetime(stock_data['Date'])
-    news_data['Date'] = pd.to_datetime(news_data['published_at']).dt.date
-    stock_data['Date_key'] = stock_data['Date'].dt.date
+    # Create copies to avoid modifying original DataFrames
+    stock_df = stock_data.copy()
+    news_df = news_data.copy()
     
-    daily_news = news_data.groupby('Date').agg({
+    # Ensure Date columns are datetime
+    stock_df['Date'] = pd.to_datetime(stock_df['Date'])
+    news_df['Date'] = pd.to_datetime(news_df['published_at']).dt.date
+    stock_df['Date_key'] = stock_df['Date'].dt.date
+    
+    # Aggregate news by date
+    daily_news = news_df.groupby('Date').agg({
         'final_score': 'mean',
         'title': 'count'
     }).rename(columns={'title': 'news_count'}).reset_index()
     
-    merged = stock_data.merge(daily_news, left_on='Date_key', right_on='Date', how='left')
-    merged = merged.drop(['Date_key'], axis=1)
+    # Merge stock and news data
+    merged = stock_df.merge(daily_news, left_on='Date_key', right_on='Date', how='left', suffixes=('', '_news'))
+    
+    # Drop duplicate date column and temporary key
+    merged = merged.drop(columns=['Date_key', 'Date_news'], errors='ignore')
+    
+    # Fill missing sentiment scores with 0 (days with no news)
+    merged['final_score'] = merged['final_score'].fillna(0)
+    merged['news_count'] = merged['news_count'].fillna(0)
     
     return merged

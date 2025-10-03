@@ -79,8 +79,14 @@ class DataProcessor:
         delta = prices.diff()
         gain = (delta.where(delta > 0, 0)).rolling(window=window).mean()
         loss = (-delta.where(delta < 0, 0)).rolling(window=window).mean()
-        rs = gain / loss
+        
+        # Avoid division by zero
+        rs = gain / loss.replace(0, np.nan)
         rsi = 100 - (100 / (1 + rs))
+        
+        # Handle edge cases where loss is 0 (all gains)
+        rsi = rsi.fillna(100)  # If no losses, RSI = 100
+        
         return rsi
     
     @staticmethod
@@ -208,8 +214,10 @@ class DataProcessor:
             if len(merged) > 10:  # Need sufficient data points
                 correlation = merged['Daily_Return'].corr(merged['avg_sentiment'])
                 
-                # Calculate impact score combining correlation and volatility
-                impact_score = abs(correlation) * sector_volatility * sentiment_volatility
+                # Calculate impact score: correlation strength weighted by sector volatility
+                # Higher volatility + stronger correlation = higher impact
+                # Normalize by sentiment volatility to account for sentiment variability
+                impact_score = abs(correlation) * sector_volatility * 100  # Scale to percentage
                 impact_scores[sector] = impact_score
             else:
                 impact_scores[sector] = 0.0
@@ -283,17 +291,24 @@ class StatisticalAnalyzer:
         Calculate Sharpe ratio
         
         Args:
-            returns: Return series
-            risk_free_rate: Risk-free rate (annual)
+            returns: Return series (daily returns)
+            risk_free_rate: Risk-free rate (annual, e.g., 0.02 for 2%)
             
         Returns:
-            Sharpe ratio
+            Annualized Sharpe ratio
         """
         if returns.empty or returns.std() == 0:
             return 0.0
         
-        excess_returns = returns.mean() - (risk_free_rate / 252)  # Daily risk-free rate
-        return excess_returns / returns.std()
+        # Calculate daily risk-free rate
+        daily_rf = risk_free_rate / 252
+        
+        # Calculate excess returns
+        excess_returns = returns.mean() - daily_rf
+        
+        # Annualize the Sharpe ratio
+        # Multiply by sqrt(252) to convert daily Sharpe to annual Sharpe
+        return (excess_returns / returns.std()) * np.sqrt(252)
 
 class ReportGenerator:
     """Generate analysis reports"""

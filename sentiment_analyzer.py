@@ -200,19 +200,18 @@ class SentimentAnalyzer:
         
         # Analyze each word for sentiment indicators
         for word in words:
-            # Check against general positive financial terms
-            if word in self.positive_words:
-                positive_count += 1
-            # Check against general negative financial terms
-            elif word in self.negative_words:
-                negative_count += 1
-            
-            # Check tariff-specific words with higher weighting
+            # Check tariff-specific words first with higher weighting
             # These terms have specific implications in trade policy contexts
             if word in self.tariff_specific_words['positive']:
                 positive_count += 2  # Double weight for trade-positive terms
             elif word in self.tariff_specific_words['negative']:
                 negative_count += 2  # Double weight for trade-negative terms
+            # Check against general positive financial terms
+            elif word in self.positive_words:
+                positive_count += 1
+            # Check against general negative financial terms
+            elif word in self.negative_words:
+                negative_count += 1
         
         # Calculate normalized sentiment score
         total_words = len(words)
